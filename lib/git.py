@@ -175,9 +175,9 @@ class Git(object):
         (returncode, stdout, stderr) = self.execute(cmd)
         return returncode == 0
 
-    def hashes(self, ref='', format='%H', limit=30):
+    def hashes(self, ref='', format='%H', limit=30, before=None):
         """Returns the latest hashes from git log"""
-        hashlist = self.log(count=limit, format=format, since=ref)
+        hashlist = self.log(count=limit, format=format, since=ref, before=before)
         return hashlist.split('\n')[:-1]
 
     def isRepository(self, path=None):
@@ -193,7 +193,7 @@ class Git(object):
         proc.wait()
         return proc.returncode == 0
 
-    def log(self, count=10, since=None, path=None, format=None):
+    def log(self, count=10, since=None, path=None, format=None, before=None):
         """Calls the log command and returns the raw output"""
         cmd = 'log'
         if count != None and count != 0:
@@ -204,6 +204,8 @@ class Git(object):
             cmd += ' %s ' % (since)
         if path != None:
             cmd += ' -- %s' % (path)
+        if before != None:
+            cmd += ' --before=%s ' % (before)
 
         (returncode, stdout, stderr) = self.execute(cmd)
         if returncode != 0:

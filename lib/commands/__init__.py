@@ -52,5 +52,6 @@ commandsList = [
     'tracker',
     'uninstall',
     'update',
-    'upgrade'
+    'upgrade',
+    'blame'
 ]

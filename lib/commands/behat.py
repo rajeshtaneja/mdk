@@ -23,6 +23,7 @@ http://github.com/FMCorz/mdk
 """
 
 import os
+import sys
 import urllib
 import re
 import logging
@@ -85,6 +86,22 @@ class BehatCommand(Command):
                 'action': 'store_true',
                 'dest': 'switchcompletely',
                 'help': 'force the switch completely setting. This will be automatically enabled for PHP < 5.4. Ignored from 2.7.'
+            }
+        ),
+        (
+            ['-sof', '--stop-on-failure'],
+            {
+                'action': 'store_true',
+                'dest': 'stoponfailure',
+                'help': 'Will stop behat on first failure.'
+            }
+        ),
+        (
+            ['-p', '--profile'],
+            {
+                'dest': 'profile',
+                'metavar': 'profile',
+                'help': 'Behat profile like phantomjs-linux'
             }
         ),
         (
@@ -204,8 +221,14 @@ class BehatCommand(Command):
             if args.testname:
                 cmd.append('--name="%s"' % (args.testname))
 
-            if not (args.tags or args.testname) and nojavascript:
+            if not (args.tags or args.testname or args.feature) and nojavascript:
                 cmd.append('--tags ~@javascript')
+
+            if (args.stoponfailure):
+                cmd.append('--stop-on-failure')
+
+            if (args.profile):
+                cmd.append('-p %s' % (args.profile))
 
             cmd.append('--config=%s/behat/behat.yml' % (M.get('behat_dataroot')))
 
@@ -253,7 +276,9 @@ class BehatCommand(Command):
                     sleep(3)
 
                 # Running the tests
-                process(cmd, M.path, None, None)
+                (returncode, none, none) = process(cmd, M.path, None, None)
+                if (args.stoponfailure):
+                    sys.exit(returncode)
 
                 # Kill the remaining processes
                 if phpServer:
